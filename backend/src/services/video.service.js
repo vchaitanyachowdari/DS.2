@@ -28,21 +28,27 @@ function generateManimSceneCode(slide, slideIndex, duration = 10) {
         .substring(0, 100)
         .replace(/"/g, '\\"')
         .replace(/'/g, "\\'");
-    const visualDesc = (slide.visualDescription || 'educational content')
+    const visualDesc = (slide.visualDescription || slide.visualType || 'text')
         .toLowerCase();
 
-    // Determine visualization type based on visual description
-    let visualizationType = 'text';
-    if (visualDesc.includes('graph') || visualDesc.includes('chart') || visualDesc.includes('plot')) {
-        visualizationType = 'graph';
-    } else if (visualDesc.includes('diagram') || visualDesc.includes('flow') || visualDesc.includes('process')) {
-        visualizationType = 'diagram';
-    } else if (visualDesc.includes('equation') || visualDesc.includes('formula') || visualDesc.includes('math')) {
-        visualizationType = 'math';
-    } else if (visualDesc.includes('list') || visualDesc.includes('bullet') || visualDesc.includes('point')) {
-        visualizationType = 'list';
-    } else if (visualDesc.includes('code') || visualDesc.includes('algorithm')) {
-        visualizationType = 'code';
+    // Determine visualization type based on visual description or type
+    let visualizationType = slide.visualType || 'text';
+
+    // If no explicit type, infer from description
+    if (!slide.visualType) {
+        if (visualDesc.includes('graph') || visualDesc.includes('chart') || visualDesc.includes('plot')) {
+            visualizationType = 'graph';
+        } else if (visualDesc.includes('brain') || visualDesc.includes('neural') || visualDesc.includes('network')) {
+            visualizationType = 'brain_diagram';
+        } else if (visualDesc.includes('diagram') || visualDesc.includes('flow') || visualDesc.includes('process')) {
+            visualizationType = 'hierarchy';
+        } else if (visualDesc.includes('equation') || visualDesc.includes('formula') || visualDesc.includes('math')) {
+            visualizationType = 'math';
+        } else if (visualDesc.includes('list') || visualDesc.includes('bullet') || visualDesc.includes('point')) {
+            visualizationType = 'list';
+        } else if (visualDesc.includes('code') || visualDesc.includes('algorithm')) {
+            visualizationType = 'code';
+        }
     }
 
     // Generate appropriate Manim scene based on type
@@ -53,188 +59,295 @@ function generateManimSceneCode(slide, slideIndex, duration = 10) {
 
 /**
  * Generate Manim visualization code based on type
+ * Enhanced to match ai_unveiled.py quality with rich animations and visuals
  */
 function generateVisualization(type, slide, slideIndex, duration) {
     const title = (slide.title || `Slide ${slideIndex + 1}`).replace(/"/g, '\\"');
     const className = `Slide${slideIndex}Scene`;
 
-    // Attempt to extract bullet points from narration if not provided
+    // Extract bullet points from slide or narration
     const bullets = slide.bulletPoints ||
-        (slide.narration || '').split('. ')
-            .filter(s => s.length > 10)
-            .slice(0, 3)
-            .map(s => s.trim().substring(0, 50) + (s.length > 50 ? "..." : ""));
+        (slide.narration || '').split(/\.\s+/)
+            .filter(s => s.length > 10 && s.length < 100)
+            .slice(0, 4)
+            .map(s => s.trim().substring(0, 60) + (s.length > 60 ? "..." : ""));
+
+    // Calculate animation time and wait time
+    const animationTime = Math.min(duration * 0.3, 5); // 30% for animations, max 5s
+    const waitTime = Math.max(duration - animationTime - 2, 1); // Remaining time for content display
 
     switch (type) {
         case 'graph':
             return `
 class ${className}(Scene):
+    """${title} - ${duration}s"""
     def construct(self):
-        # Title
-        title = Text("${title}", font_size=42, color=BLUE_B).to_edge(UP, buff=0.5)
+        # Title with gradient effect
+        title = Text("${title}", font_size=48, color=BLUE_C)
+        title.to_edge(UP, buff=0.5)
         self.play(Write(title), run_time=1.5)
-        
-        # Create axes
+
+        # Create axes with labels
         axes = Axes(
-            x_range=[0, 10, 1],
-            y_range=[0, 10, 1],
-            x_length=8,
+            x_range=[0, 10, 2],
+            y_range=[0, 10, 2],
+            x_length=9,
             y_length=5,
-            axis_config={"include_tip": True, "color": GRAY}
-        ).shift(DOWN * 0.5)
-        
-        # Create a sample curve
-        graph = axes.plot(lambda x: 0.1 * x**2 + 1, color=BLUE)
-        label = axes.get_graph_label(graph, label="Progress")
-        
-        self.play(Create(axes), run_time=1)
-        self.play(Create(graph), FadeIn(label), run_time=2)
-        self.wait(${Math.max(1, duration - 5)})
-        self.play(FadeOut(Group(*self.mobjects)))
+            axis_config={"include_tip": True, "include_numbers": True, "color": GRAY}
+        ).shift(DOWN * 0.3)
+
+        x_label = axes.get_x_axis_label("Time", direction=DOWN)
+        y_label = axes.get_y_axis_label("Progress", direction=LEFT)
+
+        # Create smooth curves with different colors
+        graph1 = axes.plot(lambda x: 0.08 * x**2 + 2, color=BLUE, x_range=[0, 9])
+        graph2 = axes.plot(lambda x: 1.5 * np.sin(x) + 5, color=GREEN, x_range=[0, 9])
+
+        label1 = Text("Growth", font_size=20, color=BLUE).next_to(graph1.point_from_proportion(0.8), UP)
+        label2 = Text("Trend", font_size=20, color=GREEN).next_to(graph2.point_from_proportion(0.8), DOWN)
+
+        self.play(Create(axes), Write(x_label), Write(y_label), run_time=1.5)
+        self.play(Create(graph1), FadeIn(label1), run_time=2)
+        self.play(Create(graph2), FadeIn(label2), run_time=2)
+        self.wait(${waitTime})
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
 `;
 
         case 'diagram':
         case 'brain_diagram':
             return `
 class ${className}(Scene):
+    """${title} - ${duration}s"""
     def construct(self):
         # Title
-        title = Text("${title}", font_size=42, color=BLUE_B).to_edge(UP, buff=0.5)
+        title = Text("${title}", font_size=48, color=BLUE_C).to_edge(UP, buff=0.5)
         self.play(Write(title), run_time=1.5)
-        
-        # Brain diagram / AI visualization
+
+        # Enhanced brain/AI visualization
         brain = VGroup()
-        core = Ellipse(width=3, height=2.4, color=PINK, fill_opacity=0.2)
-        brain.add(core)
-        
-        for _ in range(12):
-            start = [np.random.uniform(-1, 1), np.random.uniform(-0.8, 0.8), 0]
-            end = [np.random.uniform(-1, 1), np.random.uniform(-0.8, 0.8), 0]
-            path = Line(start, end, color=YELLOW, stroke_width=1, stroke_opacity=0.6)
-            brain.add(path)
-            
-        brain.shift(LEFT * 3)
-        self.play(FadeIn(brain), run_time=2)
-        
-        # Bullet points from narration
+        brain_outline = Ellipse(width=3.5, height=2.8, color=PINK, fill_opacity=0.3, stroke_width=3)
+
+        # Neural pathways inside brain with varied colors
+        pathways = VGroup()
+        for i in range(25):
+            start = np.array([np.random.uniform(-1.4, 1.4), np.random.uniform(-1, 1), 0])
+            end = start + np.array([np.random.uniform(-0.6, 0.6), np.random.uniform(-0.6, 0.6), 0])
+            color = random.choice([YELLOW, TEAL, BLUE, GREEN])
+            line = Line(start, end, color=color, stroke_width=1.5, stroke_opacity=0.7)
+            pathways.add(line)
+
+        brain.add(brain_outline, pathways)
+        brain.shift(LEFT * 3.5)
+
+        brain_label = Text("AI System", font_size=22, color=PINK).next_to(brain, DOWN, buff=0.3)
+
+        self.play(Create(brain_outline), run_time=1.2)
+        self.play(Create(pathways, lag_ratio=0.05), run_time=2)
+        self.play(Write(brain_label), run_time=0.8)
+
+        # Arrow to key points
+        arrow = Arrow(brain.get_right(), RIGHT * 0.2, color=YELLOW, buff=0.2)
+        self.play(Create(arrow), run_time=0.8)
+
+        # Enhanced bullet points with icons
         bullet_list = VGroup()
-${bullets.map((b, i) => `        b${i} = Text("• ${b.replace(/"/g, '\\"')}", font_size=24, color=WHITE)
-        bullet_list.add(b${i})`).join('\n')}
-        bullet_list.arrange(DOWN, aligned_edge=LEFT, buff=0.5).shift(RIGHT * 3)
-        
-        for b in bullet_list:
-            self.play(FadeIn(b, shift=RIGHT), run_time=0.8)
-            
-        self.wait(${Math.max(1, duration - 6)})
-        self.play(*[FadeOut(m) for m in self.mobjects])
+${bullets.map((b, i) => `        bullet${i} = VGroup(
+            Text(">", font_size=32, color=YELLOW),
+            Text("${b.replace(/"/g, '\\"').replace(/\n/g, ' ')}", font_size=24, color=WHITE)
+        ).arrange(RIGHT, buff=0.3)
+        bullet_list.add(bullet${i})`).join('\n')}
+        bullet_list.arrange(DOWN, aligned_edge=LEFT, buff=0.4).shift(RIGHT * 2.8)
+
+        for bullet in bullet_list:
+            self.play(FadeIn(bullet, shift=RIGHT), run_time=0.8)
+            self.wait(0.5)
+
+        self.wait(${waitTime})
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
 `;
 
         case 'hierarchy':
         case 'process':
             return `
 class ${className}(Scene):
+    """${title} - ${duration}s"""
     def construct(self):
-        title = Text("${title}", font_size=42, color=BLUE_B).to_edge(UP, buff=0.5)
+        title = Text("${title}", font_size=48, color=BLUE_C).to_edge(UP, buff=0.5)
         self.play(Write(title), run_time=1.5)
-        
-        # Hierarchy root
+
+        # Central concept with enhanced design
         root = VGroup(
-            RoundedRectangle(width=3, height=1, color=GOLD, fill_opacity=0.3),
-            Text("Core Concepts", font_size=20, color=GOLD)
-        ).shift(UP * 1.5)
-        self.play(FadeIn(root))
-        
+            RoundedRectangle(width=3.5, height=1.2, corner_radius=0.2, color=GOLD, fill_opacity=0.4, stroke_width=3),
+            Text("Core Concept", font_size=24, color=GOLD, weight=BOLD)
+        ).shift(UP * 1.8)
+        self.play(FadeIn(root, scale=0.8), run_time=1)
+
+        # Create hierarchical nodes with varied colors
         nodes = VGroup()
-        colors = [BLUE_C, GREEN_C, RED_C]
-${bullets.map((b, i) => `        n${i} = VGroup(
-            RoundedRectangle(width=3.5, height=0.8, color=${['BLUE_C', 'GREEN_C', 'RED_C'][i] || 'GRAY_C'}, fill_opacity=0.2),
-            Text("${b.substring(0, 30).replace(/"/g, '\\"')}", font_size=18, color=WHITE)
+        colors = [BLUE_C, GREEN_C, RED_C, PURPLE_C]
+${bullets.map((b, i) => `        node${i} = VGroup(
+            RoundedRectangle(width=4, height=0.9, corner_radius=0.15,
+                           color=${['BLUE_C', 'GREEN_C', 'RED_C', 'PURPLE_C'][i] || 'TEAL_C'},
+                           fill_opacity=0.3, stroke_width=2),
+            Text("${b.substring(0, 35).replace(/"/g, '\\"').replace(/\n/g, ' ')}", font_size=20, color=WHITE)
         )
-        nodes.add(n${i})`).join('\n')}
-        nodes.arrange(DOWN, buff=0.4).shift(DOWN * 0.5)
-        
-        for node in nodes:
-            line = Line(root.get_bottom(), node.get_top(), color=GRAY, stroke_width=2)
-            self.play(Create(line), FadeIn(node), run_time=0.8)
-            
-        self.wait(${Math.max(1, duration - 6)})
-        self.play(*[FadeOut(m) for m in self.mobjects])
+        nodes.add(node${i})`).join('\n')}
+        nodes.arrange(DOWN, buff=0.5).shift(DOWN * 0.3)
+
+        # Animate hierarchy with connecting lines
+        lines = VGroup()
+        for i, node in enumerate(nodes):
+            angle = (i - len(nodes) / 2 + 0.5) * 0.3
+            start = root.get_bottom()
+            end = node.get_top()
+            line = Line(start, end, color=GRAY, stroke_width=2.5, stroke_opacity=0.7)
+            lines.add(line)
+            self.play(Create(line), FadeIn(node, shift=DOWN * 0.3), run_time=1)
+            self.wait(0.4)
+
+        self.wait(${waitTime})
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
 `;
 
         case 'list':
             return `
 class ${className}(Scene):
+    """${title} - ${duration}s"""
     def construct(self):
-        # Title
-        title = Text("${title}", font_size=42, color=BLUE_B).to_edge(UP, buff=0.5)
+        # Title with underline
+        title = Text("${title}", font_size=48, color=BLUE_C).to_edge(UP, buff=0.5)
+        underline = Line(LEFT, RIGHT, color=BLUE_C).scale(2).next_to(title, DOWN, buff=0.1)
         self.play(Write(title), run_time=1.5)
-        
-        # Bullet points from narration
-        points = VGroup(
-${bullets.map(b => `            Text("→ ${b.replace(/"/g, '\\"')}", font_size=28, color=WHITE)`).join(',\n')}
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.5).shift(DOWN * 0.5)
-        
-        for point in points:
-            self.play(FadeIn(point, shift=RIGHT * 0.5), run_time=0.8)
-            self.wait(0.3)
-        
-        self.wait(${Math.max(1, duration - 5)})
-        self.play(*[FadeOut(m) for m in self.mobjects])
+        self.play(Create(underline), run_time=0.5)
+
+        # Enhanced bullet points with icons and boxes
+        points = VGroup()
+${bullets.map((b, i) => `        point${i} = VGroup(
+            RoundedRectangle(width=10, height=0.8, corner_radius=0.1,
+                           color=${['BLUE', 'GREEN', 'YELLOW', 'PURPLE'][i] || 'TEAL'},
+                           fill_opacity=0.2, stroke_width=2),
+            Text("•", font_size=36, color=${['BLUE', 'GREEN', 'YELLOW', 'PURPLE'][i] || 'TEAL'}),
+            Text("${b.replace(/"/g, '\\"').replace(/\n/g, ' ')}", font_size=24, color=WHITE)
+        )
+        point${i}[1].shift(LEFT * 4.5)
+        point${i}[2].next_to(point${i}[1], RIGHT, buff=0.4)
+        points.add(point${i})`).join('\n')}
+        points.arrange(DOWN, buff=0.4, aligned_edge=LEFT).shift(DOWN * 0.5)
+
+        # Animate each point with emphasis
+        for i, point in enumerate(points):
+            self.play(
+                FadeIn(point[0], scale=0.95),
+                FadeIn(point[1], shift=RIGHT * 0.3),
+                Write(point[2]),
+                run_time=1.2
+            )
+            self.wait(0.6)
+
+        self.wait(${waitTime})
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
 `;
 
         case 'code':
             return `
 class ${className}(Scene):
+    """${title} - ${duration}s"""
     def construct(self):
         # Title
-        title = Text("${title}", font_size=42).to_edge(UP)
-        self.play(Write(title))
-        
-        # Code block representation
+        title = Text("${title}", font_size=48, color=BLUE_C).to_edge(UP, buff=0.5)
+        self.play(Write(title), run_time=1.5)
+
+        # Code terminal appearance
+        terminal_bg = RoundedRectangle(
+            width=11, height=5.5, corner_radius=0.2,
+            color=GRAY_D, fill_opacity=0.9, stroke_width=2
+        ).shift(DOWN * 0.3)
+
+        # Terminal header
+        header = Rectangle(width=11, height=0.5, color=GRAY_C, fill_opacity=1)
+        header.align_to(terminal_bg, UP).shift(DOWN * 0.25)
+
+        dots = VGroup(*[
+            Dot(radius=0.08, color=RED),
+            Dot(radius=0.08, color=YELLOW),
+            Dot(radius=0.08, color=GREEN)
+        ]).arrange(RIGHT, buff=0.15)
+        dots.next_to(header, LEFT, buff=0.5).shift(RIGHT * 0.5)
+
+        self.play(FadeIn(terminal_bg), FadeIn(header), FadeIn(dots), run_time=1)
+
+        # Code block with syntax highlighting simulation
         code_text = '''# Algorithm Implementation
 def process_data(input_stream):
-    results = [analyze(item) for item in input_stream]
-    return filter_valid(results)'''
-        
+    results = []
+    for item in input_stream:
+        analyzed = analyze(item)
+        if is_valid(analyzed):
+            results.append(analyzed)
+    return results'''
+
         code = Code(
             code=code_text,
             language="python",
-            font_size=20,
+            font_size=18,
             background="rectangle",
-            background_stroke_color=WHITE,
-        ).shift(DOWN * 0.5)
-        
-        self.play(Create(code), run_time=1.5)
-        self.wait(${Math.max(1, duration - 3)})
-        self.play(*[FadeOut(m) for m in self.mobjects])
+            background_stroke_width=0,
+            insert_line_no=True,
+            style="monokai"
+        ).scale(0.8).move_to(terminal_bg.get_center()).shift(DOWN * 0.1)
+
+        self.play(Create(code), run_time=2.5)
+        self.wait(${waitTime})
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
 `;
 
         default: // text
             return `
 class ${className}(Scene):
+    """${title} - ${duration}s"""
     def construct(self):
-        # Title with animation
-        title = Text("${title}", font_size=48, color=BLUE)
-        title.to_edge(UP, buff=0.5)
-        
-        # Summary text from narration
-        summary_text = "${(slide.narration || '').substring(0, 150).replace(/"/g, "'").replace(/\n/g, ' ')}"
-        if len(summary_text) > 80:
-            summary_text = summary_text[:77] + "..."
-            
-        summary = Text(summary_text, font_size=28, color=WHITE)
-        summary.next_to(title, DOWN, buff=1.2)
-        
-        # Decorative box
-        box = RoundedRectangle(width=10, height=3, color=BLUE_D, fill_opacity=0.1)
-        box.next_to(summary, DOWN, buff=0.5)
-        
-        self.play(Write(title), run_time=1)
-        self.play(FadeIn(summary, shift=UP), run_time=1)
+        # Title with gradient-like effect
+        title = Text("${title}", font_size=52, color=BLUE_C, weight=BOLD)
+        title.to_edge(UP, buff=0.4)
+        underline = Line(LEFT, RIGHT, color=BLUE_C).scale(title.width / 2).next_to(title, DOWN, buff=0.1)
+
+        self.play(Write(title), run_time=1.5)
+        self.play(Create(underline), run_time=0.6)
+
+        # Summary text from narration with word wrapping
+        summary_text = """${(slide.narration || '').substring(0, 200).replace(/"/g, "'").replace(/\n/g, ' ')}"""
+
+        summary = Text(
+            summary_text[:150] + ("..." if len(summary_text) > 150 else ""),
+            font_size=26,
+            color=WHITE,
+            line_spacing=1.2
+        ).scale(0.9)
+        summary.next_to(title, DOWN, buff=1.5)
+
+        # Decorative elements
+        box = RoundedRectangle(
+            width=11, height=4, corner_radius=0.2,
+            color=BLUE_D, fill_opacity=0.15, stroke_width=3
+        )
+        box.surround(summary, buff=0.6)
+
+        # Key points or highlights
+        highlight = VGroup()
+        if len("""${bullets.join(' ')}""") > 10:
+${bullets.slice(0, 3).map((b, i) => `            h${i} = Text("• ${b.substring(0, 40).replace(/"/g, '\\"').replace(/\n/g, ' ')}", font_size=22, color=YELLOW)
+            highlight.add(h${i})`).join('\n')}
+            highlight.arrange(DOWN, aligned_edge=LEFT, buff=0.3).next_to(box, DOWN, buff=0.6)
+
+        self.play(FadeIn(summary, shift=UP), run_time=1.5)
         self.play(Create(box), run_time=1)
-        
-        self.wait(${Math.max(1, duration - 4)})
-        self.play(*[FadeOut(m) for m in self.mobjects])
+
+        if len(highlight) > 0:
+            for h in highlight:
+                self.play(FadeIn(h, shift=RIGHT), run_time=0.7)
+
+        self.wait(${waitTime})
+        self.play(*[FadeOut(mob) for mob in self.mobjects])
 `;
     }
 }
@@ -252,17 +365,22 @@ async function generateManimFile(slides, jobId) {
     const fileName = `video_${jobId}.py`;
     const filePath = path.join(outputDir, fileName);
 
-    // Build complete Manim file
+    // Build complete Manim file with enhanced configuration
     let manimCode = `
 from manim import *
 import numpy as np
+import random
 
-# Auto-generated video scenes for job ${jobId}
-# Generated at ${new Date().toISOString()}
+# Auto-generated educational video
+# Job ID: ${jobId}
+# Generated: ${new Date().toISOString()}
+# Total slides: ${slides.length}
 
+# Video configuration
 config.pixel_height = 720
 config.pixel_width = 1280
-config.frame_rate = 30
+config.frame_rate = 24  # Smoother playback at 24fps
+config.background_color = "#0f0f23"  # Dark background for better contrast
 
 `;
 
