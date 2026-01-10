@@ -1,0 +1,86 @@
+{
+  "videoId": "6c00ad75-4dcd-42f5-a57d-ba40447a0066",
+  "title": "AI Unveiled: Transforming Today's World",
+  "description": "Dive into the fascinating world of Artificial Intelligence (AI) and discover how it's reshaping industries, from healthcare to entertainment. Learn about the goals, applications, and ethical concerns surrounding AI in an engaging and accessible way.",
+  "duration": "8:15",
+  "category": "AI/ML",
+  "source": "AI Generated",
+  "sourceUrl": "https://en.wikipedia.org/wiki/Artificial_intelligence",
+  "createdAt": "2026-01-09T07:02:36.575501",
+  "generationJobId": "video_4qJyiZuvDp-z",
+  "processingTime": "27 seconds",
+
+  "slides": [
+    {
+      "slideNumber": 1,
+      "heading": "Introduction",
+      "duration": 30,
+      "narration": "Welcome to the incredible journey into Artificial Intelligence, or AI, a field blending computer science with ingenious algorithms to create machines that think and act like humans. Imagine a world where machines learn from their experiences and make decisions just like we do. Intrigued? Let's dive in!",
+      "visualDescription": "Animated introduction showing various AI applications like autonomous cars, virtual assistants, and robots performing human-like tasks."
+    },
+    {
+      "slideNumber": 2,
+      "heading": "What is AI?",
+      "duration": 45,
+      "narration": "At its core, AI is the brains behind machines, enabling them to learn, reason, and solve problems. It's why your smartphone can respond to your voice and why some cars can drive themselves. But how did this technology come to be, and why is it so important? Let's find out.",
+      "visualDescription": "Flowing graphics illustrating AI in action: voice recognition, learning algorithms, and self-driving cars."
+    },
+    {
+      "slideNumber": 3,
+      "heading": "The Evolution of AI",
+      "duration": 45,
+      "narration": "The journey of AI began in the 1950s, evolving from simple puzzles to machines that can beat humans in complex games. But it's not been smooth sailing; the field has seen both booms and winters. Yet, recent advancements have led us into an AI boom, thanks to deep learning and neural networks.",
+      "visualDescription": "Timeline animation showing key milestones in AI history, interspersed with visuals of old computers and modern AI technologies."
+    },
+    {
+      "slideNumber": 4,
+      "heading": "AI Goals and Research",
+      "duration": 45,
+      "narration": "AI aims to mimic human intelligence. This includes learning from data, understanding languages, recognizing objects and sounds, and making decisions. Researchers use various techniques, drawing from psychology to computer science, to create smarter AI.",
+      "visualDescription": "Icons and brief animations depicting different AI goals: a brain for learning, a chat bubble for language processing, and a robot making decisions."
+    },
+    {
+      "slideNumber": 5,
+      "heading": "Real-World AI Applications",
+      "duration": 60,
+      "narration": "AI is not just theory; it's all around us. From recommending the next song on your playlist to powering chatbots that answer your questions, AI makes many modern conveniences possible. And it's pushing boundaries in healthcare, finance, and even creative arts.",
+      "visualDescription": "Showcase of AI applications: a music app suggesting songs, a chatbot assisting customers, and AI generating artwork."
+    },
+    {
+      "slideNumber": 6,
+      "heading": "Ethics and AI",
+      "duration": 45,
+      "narration": "But with great power comes great responsibility. AI's rapid growth raises ethical questions, from privacy concerns to the impact on jobs. How do we ensure AI benefits society without causing harm? It's a global conversation we're all a part of.",
+      "visualDescription": "Animated scales balancing AI benefits and ethical concerns, with question marks symbolizing the ongoing debate."
+    },
+    {
+      "slideNumber": 7,
+      "heading": "The Future of AI",
+      "duration": 45,
+      "narration": "What lies ahead for AI? The possibilities are as vast as our imagination. From achieving Artificial General Intelligence, where machines can perform any cognitive task, to solving some of humanity's biggest challenges, the future of AI is both exciting and unknown.",
+      "visualDescription": "Futuristic cityscape with AI integrated into all aspects of life, highlighting potential positive impacts on society."
+    },
+    {
+      "slideNumber": 8,
+      "heading": "Conclusion",
+      "duration": 30,
+      "narration": "As we stand on the brink of AI's potential, it's clear that this technology isn't just about machines; it's about us. How we develop, use, and regulate AI will define the future. So, let's continue this journey with curiosity, creativity, and caution.",
+      "visualDescription": "A global view showing diverse people using AI in daily life, symbolizing a collective journey into the future."
+    }
+  ],
+
+  "metadata": {
+    "extractedContentLength": "15000 characters",
+    "totalSlides": 8,
+    "totalDuration": "8 minutes 15 seconds",
+    "aiModel": "OpenAI GPT",
+    "generationMethod": "URL content extraction + AI script generation",
+    "contentSource": "Wikipedia - Artificial Intelligence article"
+  },
+
+  "apiEndpoints": {
+    "getVideo": "GET http://localhost:5000/api/videos/6c00ad75-4dcd-42f5-a57d-ba40447a0066",
+    "myVideos": "GET http://localhost:5000/api/videos/my-videos",
+    "jobStatus": "GET http://localhost:5000/api/generate/video/video_4qJyiZuvDp-z/status"
+  }
+}

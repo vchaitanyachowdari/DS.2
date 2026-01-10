@@ -1,0 +1,46 @@
+# Environment variables (API keys - CRITICAL: Never commit these!)
+.env
+.env.local
+.env.production
+.env.development
+*.env
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build outputs
+dist/
+build/
+
+# Media files (generated videos/audio)
+backend/public/videos/*.mp4
+backend/public/audio/*.mp3
+backend/temp/
+
+# Python cache (for Manim)
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Redis dump
+dump.rdb

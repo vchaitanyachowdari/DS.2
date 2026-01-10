@@ -1,0 +1,8 @@
+file 'slide_01_synced.mp4'
+file 'slide_02_synced.mp4'
+file 'slide_03_synced.mp4'
+file 'slide_04_synced.mp4'
+file 'slide_05_synced.mp4'
+file 'slide_06_synced.mp4'
+file 'slide_07_synced.mp4'
+file 'slide_08_synced.mp4'

@@ -1,0 +1,8 @@
+file 'Slide1_Introduction.mp4'
+file 'Slide2_WhatIsAI.mp4'
+file 'Slide3_Evolution.mp4'
+file 'Slide4_Goals.mp4'
+file 'Slide5_Applications.mp4'
+file 'Slide6_Ethics.mp4'
+file 'Slide7_Future.mp4'
+file 'Slide8_Conclusion.mp4'
