@@ -31,7 +31,7 @@ router.post(
       .withMessage('Repository URL is required')
       .isURL()
       .withMessage('Must be a valid URL')
-      .matches(/^https:\/\/github\.com\/[\w-]+\/[\w.-]+\/?$/)
+      .matches(/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+/)
       .withMessage('Must be a valid GitHub repository URL (https://github.com/owner/repo)')
   ],
   validate,

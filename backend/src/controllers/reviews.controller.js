@@ -9,8 +9,8 @@ const { nanoid } = require('nanoid');
 const { codeReviewQueue } = require('../jobs/queue');
 const PDFDocument = require('pdfkit');
 
-// Daily review limit
-const DAILY_REVIEW_LIMIT = 3;
+// Daily review limit (increased for testing)
+const DAILY_REVIEW_LIMIT = 10;
 
 /**
  * Submit a GitHub repository for code review
@@ -20,8 +20,8 @@ const submitReview = asyncHandler(async (req, res) => {
   const { repoUrl } = req.body;
   const userId = req.userId;
 
-  // Validate GitHub URL
-  const githubRegex = /^https:\/\/github\.com\/[\w-]+\/[\w.-]+\/?$/;
+  // Validate GitHub URL (more permissive to allow various URL formats)
+  const githubRegex = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+/;
   if (!repoUrl || !githubRegex.test(repoUrl)) {
     throw new AppError('Invalid GitHub repository URL. Format: https://github.com/owner/repo', 400);
   }
